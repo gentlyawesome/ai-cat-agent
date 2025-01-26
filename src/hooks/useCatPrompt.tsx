@@ -1,8 +1,17 @@
+// api
+import { fetchBreeds } from "../api/fetchBreeds";
+
 // openai
 import { OpenAI } from "openai";
 
+// react-query
+import { useQuery } from "react-query";
+
 // react
 import { useEffect, useState } from "react";
+
+// model
+import { Breed } from "../components/CatCards";
 
 const client = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAPIKEY,
@@ -10,6 +19,8 @@ const client = new OpenAI({
 });
 
 const useCatPrompt = () => {
+  const { data: breed, status } = useQuery("breeds", fetchBreeds);
+
   const [selectedBreed, setSelectedBreed] = useState("");
   const [choices, setChoices] = useState<any>([]);
   const [userInput, setUserInput] = useState("");
@@ -55,26 +66,33 @@ const useCatPrompt = () => {
   }
 
   useEffect(() => {
+    const mapBreed =
+      breed
+        ?.map((breed: Breed) => breed.name + " " + breed.description)
+        .join(", ") || "";
     const SYSTEM_PROMPT = ` 
     You are a cat specialist AI agent. You are helping a user who is looking for information on cat breeds. 
-    The user asks you to provide information on the following cat breeds: ${selectedBreed}. 
+    The user asks you to provide information on the following cat breeds: ${mapBreed}. 
   `;
 
     messages.push({
       role: "system",
       content: SYSTEM_PROMPT,
     });
-  }, [selectedBreed, messages]);
+  }, [breed, messages]);
 
   const onSubmit = async () => {
-    executeAI();
+    setUserInput("");
+    // executeAI();
   };
 
   return {
+    breed,
     messages,
     selectedBreed,
     choices,
     userInput,
+    status,
     setSelectedBreed,
     setUserInput,
     onSubmit,
