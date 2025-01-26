@@ -83,7 +83,7 @@ const useCatPrompt = () => {
 
   const onSubmit = async () => {
     setUserInput("");
-    // executeAI();
+    executeAI();
   };
 
   return {
